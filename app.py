@@ -42,6 +42,9 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if "hint" not in st.session_state:
+    st.session_state.hint = None
+
 st.subheader("Make a guess")
 
 st.info(
@@ -77,14 +80,20 @@ if new_game:
     st.session_state.status = "playing"  #FIX: added missing status reset so game is no longer stuck after win/loss
     st.session_state.history = []  #FIX: added missing history reset
     st.session_state.score = 0  #FIX: added missing score reset
+    st.session_state.hint = None
     st.rerun()
 
-if st.session_state.status != "playing":
-    if st.session_state.status == "won":
-        st.success("You already won. Start a new game to play again.")
-    else:
-        st.error("Game over. Start a new game to try again.")
+if st.session_state.status == "won":
+    st.balloons()
+    st.success(f"You won! The secret was {st.session_state.secret}. Final score: {st.session_state.score}")
     st.stop()
+
+if st.session_state.status == "lost":
+    st.error(f"Out of attempts! The secret was {st.session_state.secret}. Score: {st.session_state.score}")
+    st.stop()
+
+if show_hint and st.session_state.hint:  #FIX: display persisted hint outside submit block so it survives st.rerun()
+    st.warning(st.session_state.hint)
 
 if submit:
     st.session_state.attempts += 1
@@ -99,8 +108,7 @@ if submit:
 
         outcome, message = check_guess(guess_int, st.session_state.secret)  #FIX: removed odd/even type-switching that passed secret as str on even attempts, causing broken lexicographic comparisons
 
-        if show_hint:
-            st.warning(message)  #FIX: hint messages were inverted ("Go HIGHER" when too high, "Go LOWER" when too low) — fixed in logic_utils.check_guess
+        st.session_state.hint = message  #FIX: save hint to session_state so it persists after st.rerun()
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
@@ -109,20 +117,11 @@ if submit:
         )
 
         if outcome == "Win":
-            st.balloons()
             st.session_state.status = "won"
-            st.success(
-                f"You won! The secret was {st.session_state.secret}. "
-                f"Final score: {st.session_state.score}"
-            )
-        else:
-            if st.session_state.attempts >= attempt_limit:
-                st.session_state.status = "lost"
-                st.error(
-                    f"Out of attempts! "
-                    f"The secret was {st.session_state.secret}. "
-                    f"Score: {st.session_state.score}"
-                )
+        elif st.session_state.attempts >= attempt_limit:
+            st.session_state.status = "lost"
+
+        st.rerun()  #FIX: rerun so debug expander and score display reflect the updated session_state score
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")

@@ -55,5 +55,8 @@ I ensured the session_state guard was properly implemented, fixed the hardcoded 
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
+  Giving the AI a starting point and asking it to run diagnostics on the feature to fix. Then asking for possible fixes and trying them out, keeping a feedback loop.
 - What is one thing you would do differently next time you work with AI on a coding task?
+Give longer prompts in some cases and optimize token usage. Maybe use more claude code features.
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+It shows that AI can falsely determine when a project is production ready and that we have to be careful and run thorough e2e tests and QA tests to ensure the app works properly. AI is good at giving a skeleton or unfinished product.
